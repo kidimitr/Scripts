@@ -1,0 +1,2 @@
+﻿$DHLglobalC = Get-ADDomainController -Server 'dhl.com' | where {$_.IsGlobalCatalog -match 'True'}
+$domain = "$($DHLglobalC.HostName):3268"

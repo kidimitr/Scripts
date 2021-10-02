@@ -1,0 +1,19 @@
+$server = 'CZCHOWSINT1596'
+$name = '2012 R2'
+$2012R2 = 'KB4534297'
+$2012R2match = $Name -match '2012 R2'
+
+
+if ($2016match -eq $true){$HOTFIX = Get-HotFix -ComputerName $server -Id $2016 -ErrorAction SilentlyContinue}
+       elseif($2012R2match -eq $true){try{$HOTFIX = Get-HotFix -ComputerName $server -Id $2012R2 -ErrorAction Stop}catch{$HOTFIX = 'Not present'}}
+       elseif($2008R2match -eq $true){$HOTFIX = Get-HotFix -ComputerName $server -Id $2008R2 -ErrorAction SilentlyContinue}
+       elseif($2008match -eq $true){$HOTFIX = Get-HotFix -ComputerName $server -Id $2008 -ErrorAction SilentlyContinue}
+  
+
+
+       $myobject = [pscustomobject] @{
+        Server = $Server
+        Hotfix = if(!$HOTFIX.hotfixid -eq $false){$HOTFIX.hotfixid}else{$HOTFIX}
+    }
+
+    $myobject

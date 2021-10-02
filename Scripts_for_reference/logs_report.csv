@@ -1,0 +1,45 @@
+﻿$server = Read-Host 'Input server'
+$Log_ID = Read-Host 'Input log ID to query'
+$To = Read-Host 'Input Email of recipient'
+$From = Read-Host 'Input Email of sender'
+
+Invoke-Command -ComputerName $server -ScriptBlock {
+  $logons = Get-WinEvent -FilterHashtable @{LogName = 'security'; id=$using:Log_ID}
+  $logs = @()
+  foreach ($logon in $logons){
+
+    $myobject = [PSCustomObject] @{
+      
+      Username = $logon.properties[5].Value
+      Time = $logon.timecreated
+  
+  
+    }
+    $logs += $myobject
+    
+    
+
+  }
+  $testpath = Test-Path C:\Temp
+  if ($testpath -eq $false){ 
+  
+      New-Item -Path c:\temp -ItemType Directory
+      $logs | select Username,Time | Export-Csv -Path c:\temp\lastlogons.csv -Append -NoTypeInformation -Delimiter ';'
+  
+    } 
+    else {$logs | select Username,Time | Export-Csv -Path c:\temp\lastlogons.csv -Append -NoTypeInformation -Delimiter ';'
+  
+  
+    }
+
+    Compress-Archive -Path c:\temp\lastlogons.csv  -DestinationPath 'c:\temp\lastlogons.zip'
+    $zip = 'c:\temp\lastlogons.zip'
+
+    Send-MailMessage -To $using:To -from $using:From -SmtpServer "gateway.dhl.com" -Subject "Last Logon Log" -Body "Attached is the logon report for $Using:server" -Attachments $zip -Priority High
+  
+    Remove-Item -Path 'c:\temp\lastlogons.csv'
+    Remove-Item -Path $zip
+
+
+}
+

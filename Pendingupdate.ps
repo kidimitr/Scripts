@@ -1,0 +1,36 @@
+﻿$start = [System.Activator]::CreateInstance([type]::GetTypeFromProgID("Microsoft.Update.Session","localhost"))
+$search = $start.CreateUpdateSearcher()
+$results = $search.Search("IsInstalled=0")
+$failed = $start.QueryHistory("","0","50") | Where-Object -Property Resultcode -Like '*4*' | Select-Object -Property Title,Date
+$i = $Host.UI.RawUI.ForegroundColor
+$Host.UI.RawUI.ForegroundColor = 'Green'
+$updates = $results.Updates
+$object1 = @()
+$object2 = @()
+foreach ($update in $updates){
+     
+    $object1 += [PSCustomObject]@{
+    
+    
+      Title = $update.title
+      KB = $($update.KBArticleIDs).Insert("","KB")
+    
+    
+  }
+  
+}
+
+foreach ($fail in $failed){
+
+
+    $object2 += [PSCustomObject]@{
+  
+      Failed = $fail.title
+      Date = $fail.date 
+    
+    }
+
+  }
+  
+  Write-Output $object1; Write-Output $object2  
+$Host.UI.RawUI.ForegroundColor = $i
